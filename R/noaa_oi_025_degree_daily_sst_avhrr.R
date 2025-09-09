@@ -5,10 +5,10 @@ noaa_oi_025_degree_daily_sst_avhrr <- function(clobber = FALSE) {
 
   method <- list(accept_follow = year00, accept_download = ".*nc$",
        no_host = FALSE)
-
+clobber_method <-     list(accept_follow = ".*", accept_download = ".*nc$",
+                                     no_host = FALSE)
   if (clobber) {
-    method <- list(accept_follow = ".*", accept_download = ".*nc$",
-                   no_host = FALSE)
+   method <- clobber_method
 
   } else {
    if (fs::file_exists(file)) {
@@ -16,8 +16,7 @@ noaa_oi_025_degree_daily_sst_avhrr <- function(clobber = FALSE) {
      files <- arrow::read_parquet(file)
      startdate <- try(as.Date(max(files$date)))
      if (inherits(startdate, "try-error")) {
-       method <- list(accept_download = ".*nc$",
-                      no_host = FALSE)
+       method <- clobber_method
      } else {
      enddate <- Sys.Date()
      seqdate <- seq(as.Date(format(startdate, "%Y-%m-01")), enddate, by = "1 month")
