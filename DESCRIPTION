@@ -15,3 +15,5 @@ Imports:
     bowerbird,
     mirai,
     purrr
+URL: https://github.com/mdsumner/dryrun
+BugReports: https://github.com/mdsumner/dryrun/issues
