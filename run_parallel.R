@@ -1,6 +1,6 @@
 
 ##-----------------------------------------------------------------------------------------------------------------------------------------------------
-rf <- sprintf("/(%s)", paste0(c("Amundsen",  "Antarctic3125NoLandMask", "AntarcticPeninsula",  "Casey-Dumont", "DavisSea", "McMurdo", "Neumayer", "NeumayerEast",
+rff <- sprintf("/(%s)", paste0(c("Amundsen",  "Antarctic3125NoLandMask", "AntarcticPeninsula",  "Casey-Dumont", "DavisSea", "McMurdo", "Neumayer", "NeumayerEast",
                                 "Polarstern", "RossSea", "ScotiaSea", "WeddellSea", "WestDavisSea", "netcdf"), collapse = "|"))
 
 
@@ -11,13 +11,11 @@ reqs <- tibble::tribble(
   ~name,
        ~method,
   "NOAA OI 1/4 Degree Daily SST AVHRR",
-      list(accept_download = ".*nc$", accept_follow = c("(/|\\.html?)$"
-                                                        , default_recent_regex()
-                                                        )),
+      list(accept_download = ".*nc$", accept_follow = default_recent_regex(mindate = as.Date("2025-06-01"))),
   "Artist AMSR2 near-real-time 3.125km sea ice concentration",
-  list(accept_download = "Antarctic3125/asi.*\\.tif", accept_follow = c("(/|\\.html?)$"
-                                                                        , default_recent_regex(mindate = as.Date("2024-01-01"), fmt = "%Y")
-  ), reject_follow = rf)
+  list(accept_download = "Antarctic3125/asi.*\\.tif",
+       accept_follow = c("(/|\\.html?)$", default_recent_regex(mindate = as.Date("2025-01-01"), fmt = "%Y")),
+       reject_follow = rff)
   )
 
 
@@ -29,6 +27,7 @@ srcs <- dplyr::group_map(dplyr::group_by(reqs, dplyr::row_number()), \(.x, ...)
 ## source name, and use a sanitized ID for the file name (hopefully we can do better, or store the IDs and random file name)
 
 ## then sync in parallel, and now and then do a full clobber
+mirai::daemons(0)
 mirai::daemons(min(c(length(srcs), parallelly::availableCores())))
 fun <- purrr::in_parallel(function(.x) {
   cf <- bowerbird::bb_config(local_file_root = tempdir())
@@ -41,3 +40,4 @@ fun <- purrr::in_parallel(function(.x) {
  sync
 })
 purrr::map(srcs, fun)
+
